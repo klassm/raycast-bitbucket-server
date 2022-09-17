@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-bitbucket-server",
+  "title": "Bitbucket Server",
+  "description": "Find Bitbucket repositories...",
+  "icon": "icon.png",
+  "author": "klassm",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Find Repository",
+      "description": "Looks for a repository",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "url",
+      "type": "textfield",
+      "title": "Bitbucket URL",
+      "required": true,
+      "default": "",
+      "description": "URL to Bitbucket Server"
+    },
+    {
+      "name": "user",
+      "type": "textfield",
+      "title": "Bitbucket User",
+      "required": true,
+      "default": "",
+      "description": "Username"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "title": "Bitbucket Password",
+      "required": true,
+      "default": "",
+      "description": "Bitbucket password. You might need to create an app password from your personal Bitbucket settings."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.3",
+    "@raycast/utils": "^1.4.0",
+    "node-fetch": "^3.2.10"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.36.2",
+    "@typescript-eslint/parser": "^5.36.2",
+    "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
