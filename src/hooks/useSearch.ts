@@ -37,10 +37,10 @@ const search = (query: string, data: Repository[]): Repository[] => {
 };
 
 export function useSearch() {
-  const {repositories = [], loading} = useRepositories();
+  const { repositories = [], loading } = useRepositories();
   const [searchResults, setSearchResults] = useState<Repository[]>([]);
   const [query, setQuery] = useState("");
-  const {mostUsed, add: updateMostUsed} = useMostUsed();
+  const { mostUsed, add: updateMostUsed } = useMostUsed();
 
   useEffect(() => {
     if (query) {
@@ -50,5 +50,5 @@ export function useSearch() {
     }
   }, [query, repositories]);
 
-  return { loading, searchResults, setQuery, updateMostUsed}
+  return { loading, searchResults, setQuery, updateMostUsed };
 }
