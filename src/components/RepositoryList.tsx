@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useSearch } from "../hooks/useSearch";
 import { Repository } from "../types/Repository";
+import { PullRequests } from "./PullRequests";
 
-export function RepositoryList() {
+export const RepositoryList = () => {
   const { searchResults, setQuery, loading, updateMostUsed } = useSearch();
 
   return (
@@ -24,9 +25,11 @@ export function RepositoryList() {
       </List.Section>
     </List>
   );
-}
+};
 
-function SearchItemsActionPanel({ href, updateMostUsed }: { href: string | undefined; updateMostUsed: () => void }) {
+const SearchItemsActionPanel = ({ item, updateMostUsed }: { item: Repository; updateMostUsed: () => void }) => {
+  const { push } = useNavigation();
+  const href = item.links?.self?.[0]?.href;
   if (href === undefined) {
     return null;
   }
@@ -34,32 +37,30 @@ function SearchItemsActionPanel({ href, updateMostUsed }: { href: string | undef
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {<Action.OpenInBrowser onOpen={updateMostUsed} title="Open" url={href} />}
-        {
-          <Action.OpenInBrowser
-            onOpen={updateMostUsed}
-            title="Pull Requests"
-            url={href.replace(/\/browse$/, "/pull-requests")}
-          />
-        }
-        {<Action.OpenInBrowser onOpen={updateMostUsed} title="Commits" url={href.replace(/\/browse$/, "/commits")} />}
-        {<Action.OpenInBrowser onOpen={updateMostUsed} title="Branches" url={href.replace(/\/browse$/, "/branches")} />}
-        {<Action.OpenInBrowser onOpen={updateMostUsed} title="Builds" url={href.replace(/\/browse$/, "/builds")} />}
+        <Action.OpenInBrowser onOpen={updateMostUsed} title="Open" url={href} />
+        <Action
+          title="Pull Requests"
+          onAction={() => {
+            updateMostUsed();
+            push(<PullRequests repository={item} />);
+          }}
+        />
+        <Action.OpenInBrowser onOpen={updateMostUsed} title="Commits" url={href.replace(/\/browse$/, "/commits")} />
+        <Action.OpenInBrowser onOpen={updateMostUsed} title="Branches" url={href.replace(/\/browse$/, "/branches")} />
+        <Action.OpenInBrowser onOpen={updateMostUsed} title="Builds" url={href.replace(/\/browse$/, "/builds")} />
       </ActionPanel.Section>
     </ActionPanel>
   );
-}
+};
 
-function SearchListItem({ item, updateMostUsed }: { item: Repository; updateMostUsed: () => void }) {
-  return (
-    <List.Item
-      title={item.name}
-      subtitle={item.slug}
-      icon={{
-        source: Icon.Box,
-        tintColor: Color.Blue,
-      }}
-      actions={<SearchItemsActionPanel href={item.links?.self?.[0]?.href} updateMostUsed={updateMostUsed} />}
-    />
-  );
-}
+const SearchListItem = ({ item, updateMostUsed }: { item: Repository; updateMostUsed: () => void }) => (
+  <List.Item
+    title={item.name}
+    subtitle={item.slug}
+    icon={{
+      source: Icon.Box,
+      tintColor: Color.Blue,
+    }}
+    actions={<SearchItemsActionPanel item={item} updateMostUsed={updateMostUsed} />}
+  />
+);
