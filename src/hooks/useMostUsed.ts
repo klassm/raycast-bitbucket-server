@@ -15,12 +15,12 @@ function getMostUsed(repositories: Repository[]): Repository[] {
 
 function updateLastUsed(oldData: Repository[], newEntry: Repository): Repository[] {
   const newEntries = [...oldData, newEntry];
-  return takeRight(newEntries, 100);
+  return takeRight(newEntries, 1000);
 }
 
 export function useMostUsed() {
   const { data, update } = useCache<Repository[]>("bitbucket-most-used", async () => [], {
-    expirationMillis: 1000 * 60 * 24 * 60,
+    expirationMillis: 1000 * 60 * 60  * 24 * 60,
   });
   const mostUsed = useMemo(() => getMostUsed(data ?? []), [data]);
 
