@@ -48,7 +48,7 @@ interface PullRequestResponse {
 
 function isPullRequestResponse(value: unknown): value is PullRequestResponse {
   const response = value as PullRequestResponse;
-  return response.limit > 0 && response.size > 0 && Array.isArray(response.values);
+  return response.limit > 0 && Array.isArray(response.values);
 }
 
 export async function loadPullRequests(
