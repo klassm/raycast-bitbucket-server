@@ -14,15 +14,9 @@ export const RepositoryList = () => {
       searchBarPlaceholder="Search Bitbucket..."
       throttle
     >
-      <List.Section title="Results">
-        {(searchResults ?? []).map((searchResult) => (
-          <SearchListItem
-            key={searchResult.id}
-            item={searchResult}
-            updateMostUsed={() => updateMostUsed(searchResult)}
-          />
-        ))}
-      </List.Section>
+      {(searchResults ?? []).map((searchResult) => (
+        <SearchListItem key={searchResult.id} item={searchResult} updateMostUsed={() => updateMostUsed(searchResult)} />
+      ))}
     </List>
   );
 };
@@ -53,14 +47,18 @@ const SearchItemsActionPanel = ({ item, updateMostUsed }: { item: Repository; up
   );
 };
 
-const SearchListItem = ({ item, updateMostUsed }: { item: Repository; updateMostUsed: () => void }) => (
-  <List.Item
-    title={item.name}
-    subtitle={item.slug}
-    icon={{
-      source: Icon.Box,
-      tintColor: Color.Blue,
-    }}
-    actions={<SearchItemsActionPanel item={item} updateMostUsed={updateMostUsed} />}
-  />
-);
+const SearchListItem = ({ item, updateMostUsed }: { item: Repository; updateMostUsed: () => void }) => {
+  const subtitle = item.name === item.slug ? undefined : item.slug;
+  return (
+    <List.Item
+      title={item.name}
+      subtitle={subtitle}
+      accessories={[{ text: item.project.name }]}
+      icon={{
+        source: Icon.Box,
+        tintColor: Color.Blue,
+      }}
+      actions={<SearchItemsActionPanel item={item} updateMostUsed={updateMostUsed} />}
+    />
+  );
+};
