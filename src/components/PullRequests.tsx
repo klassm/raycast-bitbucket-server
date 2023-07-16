@@ -9,7 +9,7 @@ interface PullRequestProps {
 }
 
 export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) => {
-  const pullRequestsToDisplay = sortBy(pullRequests ?? [], pr => pr.updatedDate).reverse();
+  const pullRequestsToDisplay = sortBy(pullRequests ?? [], (pr) => pr.updatedDate).reverse();
   return (
     <List
       isLoading={loading}
@@ -18,7 +18,7 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) =>
       searchBarPlaceholder="Search Pull Requests..."
       throttle
     >
-      {(pullRequestsToDisplay).map((searchResult) => (
+      {pullRequestsToDisplay.map((searchResult) => (
         <PullRequestItem key={searchResult.id} pullRequest={searchResult} />
       ))}
     </List>

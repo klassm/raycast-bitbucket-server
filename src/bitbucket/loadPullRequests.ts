@@ -41,8 +41,8 @@ interface PullRequestResponseEntry {
   toRef: {
     repository: {
       name: string;
-    }
-  }
+    };
+  };
 }
 
 interface PullRequestResponse {
@@ -68,7 +68,7 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
     reviewers: value.reviewers.map(({ user }) => user),
     author: value.author.user,
     href: value.links.self[0]?.href,
-    repositoryName: value.toRef.repository.name
+    repositoryName: value.toRef.repository.name,
   }));
 }
 
