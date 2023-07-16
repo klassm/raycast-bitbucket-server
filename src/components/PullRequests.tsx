@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { sortBy } from "lodash";
 import { PullRequest } from "../bitbucket/loadPullRequests";
-import { useProjectPullRequests } from "../hooks/useProjectPullRequests";
-import { Repository } from "../types/Repository";
 import { FC } from "react";
 
 interface PullRequestProps {
@@ -10,6 +9,7 @@ interface PullRequestProps {
 }
 
 export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) => {
+  const pullRequestsToDisplay = sortBy(pullRequests ?? [], pr => pr.updatedDate).reverse();
   return (
     <List
       isLoading={loading}
@@ -18,7 +18,7 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) =>
       searchBarPlaceholder="Search Pull Requests..."
       throttle
     >
-      {(pullRequests ?? []).map((searchResult) => (
+      {(pullRequestsToDisplay).map((searchResult) => (
         <PullRequestItem key={searchResult.id} pullRequest={searchResult} />
       ))}
     </List>
@@ -51,6 +51,7 @@ const PullRequestItemDetail: FC<{ pullRequest: PullRequest }> = ({ pullRequest }
   const markdown = `
   ## ${pullRequest.title}
   \`\`\`
+  Repository: ${pullRequest.repositoryName}
   Author: ${pullRequest.author.displayName}
   Created: ${new Date(pullRequest.createdDate).toLocaleString()}
   Updated: ${new Date(pullRequest.updatedDate).toLocaleString()}

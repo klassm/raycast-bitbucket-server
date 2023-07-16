@@ -12,6 +12,7 @@ export interface PullRequest {
   href: string;
   createdDate: number;
   updatedDate: number;
+  repositoryName: string;
 }
 
 interface User {
@@ -37,6 +38,11 @@ interface PullRequestResponseEntry {
   links: {
     self: { href: string }[];
   };
+  toRef: {
+    repository: {
+      name: string;
+    }
+  }
 }
 
 interface PullRequestResponse {
@@ -51,7 +57,7 @@ function isPullRequestResponse(value: unknown): value is PullRequestResponse {
   return response.limit > 0 && Array.isArray(response.values);
 }
 
-function mapPullRequestResponse(result: PullRequestResponse) {
+function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
   return result.values.map((value) => ({
     id: value.id,
     title: value.title,
@@ -62,6 +68,7 @@ function mapPullRequestResponse(result: PullRequestResponse) {
     reviewers: value.reviewers.map(({ user }) => user),
     author: value.author.user,
     href: value.links.self[0]?.href,
+    repositoryName: value.toRef.repository.name
   }));
 }
 
@@ -91,6 +98,6 @@ export async function loadProjectPullRequests(
 }
 
 export async function loadMyPullRequests({ user, password, url }: Config): Promise<PullRequest[]> {
-  const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests`;
+  const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests?state=OPEN`;
   return loadPullRequests(requestUrl, user, password);
 }
