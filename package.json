@@ -15,6 +15,12 @@
       "title": "Search Repository",
       "description": "Looks for a repository",
       "mode": "view"
+    },
+    {
+      "name": "my-pull-requests",
+      "title": "My Pull Requests",
+      "description": "Looks for pull requests assigned to the current user.",
+      "mode": "view"
     }
   ],
   "preferences": [

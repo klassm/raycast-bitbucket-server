@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import { useSearch } from "../hooks/useSearch";
 import { Repository } from "../types/Repository";
-import { PullRequests } from "./PullRequests";
+import { ProjectPullRequests } from "./ProjectPullRequests";
 
 export const RepositoryList = () => {
   const { searchResults, setQuery, loading, updateMostUsed } = useSearch();
@@ -36,7 +36,7 @@ const SearchItemsActionPanel = ({ item, updateMostUsed }: { item: Repository; up
           title="Pull Requests"
           onAction={() => {
             updateMostUsed();
-            push(<PullRequests repository={item} />);
+            push(<ProjectPullRequests repository={item} />);
           }}
         />
         <Action.OpenInBrowser onOpen={updateMostUsed} title="Commits" url={href.replace(/\/browse$/, "/commits")} />

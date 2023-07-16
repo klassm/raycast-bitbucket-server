@@ -51,24 +51,7 @@ function isPullRequestResponse(value: unknown): value is PullRequestResponse {
   return response.limit > 0 && Array.isArray(response.values);
 }
 
-export async function loadPullRequests(
-  { user, password, url }: Config,
-  { slug, project }: Repository
-): Promise<PullRequest[]> {
-  const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests`;
-  const response = await fetch(requestUrl, {
-    method: "GET",
-    headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
-    },
-  });
-
-  const result = await response.json();
-  if (!isPullRequestResponse(result)) {
-    console.log("Weird pull request response from Bitbucket", result, response.status);
-    throw new Error(`Got a weird pull request response from Bitbucket: ${response.status} ${response.statusText}`);
-  }
-
+function mapPullRequestResponse(result: PullRequestResponse) {
   return result.values.map((value) => ({
     id: value.id,
     title: value.title,
@@ -80,4 +63,34 @@ export async function loadPullRequests(
     author: value.author.user,
     href: value.links.self[0]?.href,
   }));
+}
+
+async function loadPullRequests(requestUrl: string, user: string, password: string) {
+  const response = await fetch(requestUrl, {
+    method: "GET",
+    headers: {
+      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+    },
+  });
+
+  const result = await response.json();
+  if (!isPullRequestResponse(result)) {
+    console.log("Weird pull request response from Bitbucket", result, response.status, response.statusText);
+    throw new Error(`Got a weird pull request response from Bitbucket: ${response.status} ${response.statusText}`);
+  }
+
+  return mapPullRequestResponse(result);
+}
+
+export async function loadProjectPullRequests(
+  { user, password, url }: Config,
+  { slug, project }: Repository
+): Promise<PullRequest[]> {
+  const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests`;
+  return loadPullRequests(requestUrl, user, password);
+}
+
+export async function loadMyPullRequests({ user, password, url }: Config): Promise<PullRequest[]> {
+  const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests`;
+  return loadPullRequests(requestUrl, user, password);
 }

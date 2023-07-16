@@ -1,16 +1,15 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { PullRequest } from "../bitbucket/loadPullRequests";
-import { usePullRequests } from "../hooks/usePullRequests";
+import { useProjectPullRequests } from "../hooks/useProjectPullRequests";
 import { Repository } from "../types/Repository";
 import { FC } from "react";
 
 interface PullRequestProps {
-  repository: Repository;
+  loading: boolean;
+  pullRequests: PullRequest[] | undefined;
 }
 
-export const PullRequests: FC<PullRequestProps> = ({ repository }) => {
-  const { loading, pullRequests } = usePullRequests(repository);
-
+export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) => {
   return (
     <List
       isLoading={loading}
