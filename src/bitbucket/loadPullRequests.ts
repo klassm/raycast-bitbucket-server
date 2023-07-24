@@ -13,6 +13,8 @@ export interface PullRequest {
   createdDate: number;
   updatedDate: number;
   repositoryName: string;
+  repositorySlug: string;
+  projectKey: string;
 }
 
 interface User {
@@ -41,6 +43,8 @@ interface PullRequestResponseEntry {
   toRef: {
     repository: {
       name: string;
+      slug: string;
+      project: { key: string }
     };
   };
 }
@@ -69,6 +73,8 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
     author: value.author.user,
     href: value.links.self[0]?.href,
     repositoryName: value.toRef.repository.name,
+    repositorySlug: value.toRef.repository.slug,
+    projectKey: value.toRef.repository.project.key
   }));
 }
 
