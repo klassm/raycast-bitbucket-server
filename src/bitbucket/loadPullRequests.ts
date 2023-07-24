@@ -44,7 +44,7 @@ interface PullRequestResponseEntry {
     repository: {
       name: string;
       slug: string;
-      project: { key: string }
+      project: { key: string };
     };
   };
 }
@@ -74,7 +74,7 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
     href: value.links.self[0]?.href,
     repositoryName: value.toRef.repository.name,
     repositorySlug: value.toRef.repository.slug,
-    projectKey: value.toRef.repository.project.key
+    projectKey: value.toRef.repository.project.key,
   }));
 }
 

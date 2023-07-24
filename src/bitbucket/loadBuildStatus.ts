@@ -16,7 +16,7 @@ interface BuildStatusResponseEntry {
 interface BuildStatusResponse {
   page: {
     values: BuildStatusResponseEntry[];
-  }
+  };
 }
 
 function isBuildStatusResponse(value: unknown): value is BuildStatusResponse {
@@ -26,12 +26,15 @@ function isBuildStatusResponse(value: unknown): value is BuildStatusResponse {
 
 function mapBuildStatusResponse(result: BuildStatusResponse): BuildStatus | undefined {
   const entry = result.page.values[0];
-  return entry === undefined ? undefined : pick(entry, 'state', 'url');
+  return entry === undefined ? undefined : pick(entry, "state", "url");
 }
 
-export async function loadBuildStatus({ user, password, url }: Config, { projectKey, repositorySlug, id }: PullRequest) {
-  const requestUrl = `${ url }/rest/ui/latest/projects/${ projectKey }/repos/${ repositorySlug }/pull-requests/${id}/builds?size=1`;
-  console.log(requestUrl)
+export async function loadBuildStatus(
+  { user, password, url }: Config,
+  { projectKey, repositorySlug, id }: PullRequest
+) {
+  const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/builds?size=1`;
+  console.log(requestUrl);
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
