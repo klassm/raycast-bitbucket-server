@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { sortBy } from "lodash";
+import { merge, sortBy } from "lodash";
 import { BuildStatus } from "../bitbucket/loadBuildStatus";
+import { Mergeable } from "../bitbucket/loadMergability";
 import { PullRequest } from "../bitbucket/loadPullRequests";
 import { FC } from "react";
 import { useBuildStatus } from "../hooks/useBuildStatus";
+import { useMergeable } from "../hooks/useMergeable";
 
 interface PullRequestProps {
   loading: boolean;
@@ -29,12 +31,13 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) =>
 
 const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
   const { buildStatus } = useBuildStatus(pullRequest);
+  const { mergeable } = useMergeable(pullRequest);
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
   return (
     <List.Item
       title={pullRequest.title}
       subtitle={subtitle}
-      detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} />}
+      detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} mergeable={mergeable} />}
       icon={{
         source: Icon.Box,
         tintColor: Color.Blue,
@@ -53,9 +56,17 @@ const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
   );
 };
 
-const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildStatus }> = ({
+function booleanToYesNo(value?: boolean): string {
+  if (value === undefined) {
+    return "unknown";
+  }
+  return value ? "yes" : "no";
+}
+
+const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildStatus; mergeable?: Mergeable }> = ({
   pullRequest,
   buildStatus,
+  mergeable,
 }) => {
   const markdown = `
   ## ${pullRequest.title}
@@ -65,6 +76,8 @@ const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildS
   Created: ${new Date(pullRequest.createdDate).toLocaleString()}
   Updated: ${new Date(pullRequest.updatedDate).toLocaleString()}
   Status: ${buildStatus === undefined ? "unknown" : buildStatus.state}
+  Conflicted: ${booleanToYesNo(mergeable?.conflicted)}
+  Mergeable: ${booleanToYesNo(mergeable?.canMerge)}
   \`\`\`
     
   ${pullRequest.description ?? ""}
