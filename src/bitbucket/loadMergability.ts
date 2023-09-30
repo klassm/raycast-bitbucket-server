@@ -24,7 +24,6 @@ export async function loadIsMergeable(
   { projectKey, repositorySlug, id }: PullRequest
 ) {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/merge`;
-  console.log(requestUrl);
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {

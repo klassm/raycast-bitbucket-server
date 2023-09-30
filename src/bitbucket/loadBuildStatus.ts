@@ -34,7 +34,6 @@ export async function loadBuildStatus(
   { projectKey, repositorySlug, id }: PullRequest
 ) {
   const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/builds?size=1`;
-  console.log(requestUrl);
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {

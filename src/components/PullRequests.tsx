@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { merge, sortBy } from "lodash";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { sortBy } from "lodash";
+import { FC } from "react";
 import { BuildStatus } from "../bitbucket/loadBuildStatus";
 import { Mergeable } from "../bitbucket/loadMergability";
 import { PullRequest } from "../bitbucket/loadPullRequests";
-import { FC } from "react";
 import { useBuildStatus } from "../hooks/useBuildStatus";
 import { useMergeable } from "../hooks/useMergeable";
 
@@ -29,6 +29,33 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) =>
   );
 };
 
+const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | undefined): Image.ImageLike => {
+  if (mergeable?.canMerge === true) {
+    return {
+      source: Icon.Checkmark,
+      tintColor: Color.Green,
+      mask: Image.Mask.Circle,
+    };
+  }
+  if (mergeable?.conflicted === true) {
+    return {
+      source: Icon.Exclamationmark,
+      tintColor: Color.Yellow,
+      mask: Image.Mask.Circle,
+    };
+  }
+  if (buildStatus?.state === "SUCCESSFUL") {
+    return "build_success.png";
+  }
+  if (buildStatus?.state === "FAILED") {
+    return "build_failure.png";
+  }
+  return {
+    source: Icon.Box,
+    tintColor: Color.Blue,
+  };
+};
+
 const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
   const { buildStatus } = useBuildStatus(pullRequest);
   const { mergeable } = useMergeable(pullRequest);
@@ -38,10 +65,7 @@ const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
       title={pullRequest.title}
       subtitle={subtitle}
       detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} mergeable={mergeable} />}
-      icon={{
-        source: Icon.Box,
-        tintColor: Color.Blue,
-      }}
+      icon={getIcon(buildStatus, mergeable)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>

@@ -87,6 +87,7 @@ async function loadPullRequests(requestUrl: string, user: string, password: stri
   });
 
   const result = await response.json();
+  console.log(JSON.stringify({ requestUrl, user, password }));
   if (!isPullRequestResponse(result)) {
     console.log("Weird pull request response from Bitbucket", result, response.status, response.statusText);
     throw new Error(`Got a weird pull request response from Bitbucket: ${response.status} ${response.statusText}`);
