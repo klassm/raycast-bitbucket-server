@@ -50,6 +50,13 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
   if (buildStatus?.state === "FAILED") {
     return "build_failure.png";
   }
+  if (buildStatus?.state === 'INPROGRESS') {
+    return {
+      source: Icon.CircleProgress50,
+      tintColor: Color.Blue,
+      mask: Image.Mask.Circle,
+    };
+  }
   return {
     source: Icon.Box,
     tintColor: Color.Blue,
