@@ -1,11 +1,13 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { sortBy } from "lodash";
-import { FC } from "react";
+import { FC, useMemo } from "react";
 import { BuildStatus } from "../bitbucket/loadBuildStatus";
 import { Mergeable } from "../bitbucket/loadMergability";
+import { PullRequestComment } from "../bitbucket/loadPullRequestComments";
 import { PullRequest } from "../bitbucket/loadPullRequests";
 import { useBuildStatus } from "../hooks/useBuildStatus";
 import { useMergeable } from "../hooks/useMergeable";
+import { usePullRequestComments } from "../hooks/usePullRequestComments";
 
 interface PullRequestProps {
   loading: boolean;
@@ -66,12 +68,14 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
 const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
   const { buildStatus } = useBuildStatus(pullRequest);
   const { mergeable } = useMergeable(pullRequest);
+  const {comments} = usePullRequestComments(pullRequest);
+
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
   return (
     <List.Item
       title={pullRequest.title}
       subtitle={subtitle}
-      detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} mergeable={mergeable} />}
+      detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} mergeable={mergeable} comments={comments}/>}
       icon={getIcon(buildStatus, mergeable)}
       actions={
         <ActionPanel>
@@ -94,24 +98,28 @@ function booleanToYesNo(value?: boolean): string {
   return value ? "yes" : "no";
 }
 
-const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildStatus; mergeable?: Mergeable }> = ({
+const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildStatus; mergeable?: Mergeable, comments?: PullRequestComment[] }> = ({
   pullRequest,
+  comments,
   buildStatus,
   mergeable,
 }) => {
+
+  const openTasks = useMemo(() => comments?.filter(comment => comment.state === 'OPEN' && comment.severity === 'BLOCKER')?.length, [comments])
   const markdown = `
-  ## ${pullRequest.title}
+  ## ${ pullRequest.title }
   \`\`\`
-  Repository: ${pullRequest.repositoryName}
-  Author: ${pullRequest.author.displayName}
-  Created: ${new Date(pullRequest.createdDate).toLocaleString()}
-  Updated: ${new Date(pullRequest.updatedDate).toLocaleString()}
-  Status: ${buildStatus === undefined ? "unknown" : buildStatus.state}
-  Conflicted: ${booleanToYesNo(mergeable?.conflicted)}
-  Mergeable: ${booleanToYesNo(mergeable?.canMerge)}
+  Repository: ${ pullRequest.repositoryName }
+  Author: ${ pullRequest.author.displayName }
+  Created: ${ new Date(pullRequest.createdDate).toLocaleString() }
+  Updated: ${ new Date(pullRequest.updatedDate).toLocaleString() }
+  Status: ${ buildStatus === undefined ? "unknown" : buildStatus.state }
+  Conflicted: ${ booleanToYesNo(mergeable?.conflicted) }
+  Mergeable: ${ booleanToYesNo(mergeable?.canMerge) }
+  Tasks: ${ openTasks ?? '??' }
   \`\`\`
     
-  ${pullRequest.description ?? ""}
+  ${ pullRequest.description ?? "" }
   `;
   return <List.Item.Detail markdown={markdown} />;
 };
