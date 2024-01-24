@@ -68,14 +68,21 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
 const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
   const { buildStatus } = useBuildStatus(pullRequest);
   const { mergeable } = useMergeable(pullRequest);
-  const {comments} = usePullRequestComments(pullRequest);
+  const { comments } = usePullRequestComments(pullRequest);
 
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
   return (
     <List.Item
       title={pullRequest.title}
       subtitle={subtitle}
-      detail={<PullRequestItemDetail pullRequest={pullRequest} buildStatus={buildStatus} mergeable={mergeable} comments={comments}/>}
+      detail={
+        <PullRequestItemDetail
+          pullRequest={pullRequest}
+          buildStatus={buildStatus}
+          mergeable={mergeable}
+          comments={comments}
+        />
+      }
       icon={getIcon(buildStatus, mergeable)}
       actions={
         <ActionPanel>
@@ -98,28 +105,30 @@ function booleanToYesNo(value?: boolean): string {
   return value ? "yes" : "no";
 }
 
-const PullRequestItemDetail: FC<{ pullRequest: PullRequest; buildStatus?: BuildStatus; mergeable?: Mergeable, comments?: PullRequestComment[] }> = ({
-  pullRequest,
-  comments,
-  buildStatus,
-  mergeable,
-}) => {
-
-  const openTasks = useMemo(() => comments?.filter(comment => comment.state === 'OPEN' && comment.severity === 'BLOCKER')?.length, [comments])
+const PullRequestItemDetail: FC<{
+  pullRequest: PullRequest;
+  buildStatus?: BuildStatus;
+  mergeable?: Mergeable;
+  comments?: PullRequestComment[];
+}> = ({ pullRequest, comments, buildStatus, mergeable }) => {
+  const openTasks = useMemo(
+    () => comments?.filter((comment) => comment.state === "OPEN" && comment.severity === "BLOCKER")?.length,
+    [comments]
+  );
   const markdown = `
-  ## ${ pullRequest.title }
+  ## ${pullRequest.title}
   \`\`\`
-  Repository: ${ pullRequest.repositoryName }
-  Author: ${ pullRequest.author.displayName }
-  Created: ${ new Date(pullRequest.createdDate).toLocaleString() }
-  Updated: ${ new Date(pullRequest.updatedDate).toLocaleString() }
-  Status: ${ buildStatus === undefined ? "unknown" : buildStatus.state }
-  Conflicted: ${ booleanToYesNo(mergeable?.conflicted) }
-  Mergeable: ${ booleanToYesNo(mergeable?.canMerge) }
-  Tasks: ${ openTasks ?? '??' }
+  Repository: ${pullRequest.repositoryName}
+  Author: ${pullRequest.author.displayName}
+  Created: ${new Date(pullRequest.createdDate).toLocaleString()}
+  Updated: ${new Date(pullRequest.updatedDate).toLocaleString()}
+  Status: ${buildStatus === undefined ? "unknown" : buildStatus.state}
+  Conflicted: ${booleanToYesNo(mergeable?.conflicted)}
+  Mergeable: ${booleanToYesNo(mergeable?.canMerge)}
+  Tasks: ${openTasks ?? "??"}
   \`\`\`
     
-  ${ pullRequest.description ?? "" }
+  ${pullRequest.description ?? ""}
   `;
   return <List.Item.Detail markdown={markdown} />;
 };
