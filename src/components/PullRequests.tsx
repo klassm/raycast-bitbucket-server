@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 import { sortBy } from "lodash";
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import { BuildStatus } from "../bitbucket/loadBuildStatus";
 import { Mergeable } from "../bitbucket/loadMergability";
 import { PullRequestComment } from "../bitbucket/loadPullRequestComments";
@@ -14,12 +14,27 @@ interface PullRequestProps {
   pullRequests: PullRequest[] | undefined;
 }
 
+function normalize(value: string): string {
+  return value.toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
+}
+
 export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) => {
-  const pullRequestsToDisplay = sortBy(pullRequests ?? [], (pr) => pr.updatedDate).reverse();
+  const [filter, setFilter] = useState<string>("");
+  const pullRequestsToDisplay = useMemo(() => {
+    const normalizedFilter = normalize(filter);
+    const filtered = (pullRequests ?? []).filter(
+      (pr) =>
+        normalize(pr.title).includes(normalizedFilter) ||
+        normalize(pr.repositoryName).includes(normalizedFilter) ||
+        normalize(pr.author.displayName).includes(normalizedFilter)
+    );
+    return sortBy(filtered, (pr) => pr.updatedDate).reverse();
+  }, [pullRequests, filter]);
+
   return (
     <List
       isLoading={loading}
-      enableFiltering={true}
+      onSearchTextChange={setFilter}
       isShowingDetail={true}
       searchBarPlaceholder="Search Pull Requests..."
       throttle
