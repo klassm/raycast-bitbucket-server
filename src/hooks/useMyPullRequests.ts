@@ -1,5 +1,4 @@
-import { loadMyPullRequests, loadProjectPullRequests } from "../bitbucket/loadPullRequests";
-import { Repository } from "../types/Repository";
+import { loadMyPullRequests } from "../bitbucket/loadPullRequests";
 import { useCache } from "./useCache";
 import { useConfig } from "./useConfig";
 
