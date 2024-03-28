@@ -10,3 +10,5 @@
 *.iml
 
 test.http
+
+raycast-env.d.ts
