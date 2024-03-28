@@ -99,11 +99,11 @@ export async function loadProjectPullRequests(
   { user, password, url }: Config,
   { slug, project }: Repository
 ): Promise<PullRequest[]> {
-  const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests`;
+  const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests?limit=1000`;
   return loadPullRequests(requestUrl, user, password);
 }
 
 export async function loadMyPullRequests({ user, password, url }: Config): Promise<PullRequest[]> {
-  const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests?state=OPEN`;
+  const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests?state=OPEN&limit=1000`;
   return loadPullRequests(requestUrl, user, password);
 }
