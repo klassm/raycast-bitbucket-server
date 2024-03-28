@@ -66,5 +66,6 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
     data,
     loading,
     update,
+    reload: reloadData,
   };
 }

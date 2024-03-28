@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { sortBy } from "lodash";
 import { FC, useMemo, useState } from "react";
 import { BuildStatus } from "../bitbucket/loadBuildStatus";
@@ -8,17 +8,21 @@ import { PullRequest } from "../bitbucket/loadPullRequests";
 import { useBuildStatus } from "../hooks/useBuildStatus";
 import { useMergeable } from "../hooks/useMergeable";
 import { usePullRequestComments } from "../hooks/usePullRequestComments";
+import { useMerge } from "../hooks/useMerge";
+import { useApprove } from "../hooks/useApprove";
+import { useConfig } from "../hooks/useConfig";
 
 interface PullRequestProps {
   loading: boolean;
   pullRequests: PullRequest[] | undefined;
+  reload: () => void;
 }
 
 function normalize(value: string): string {
   return value.toLowerCase().replace(/[^a-zA-Z0-9]/g, "");
 }
 
-export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) => {
+export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests, reload }) => {
   const [filter, setFilter] = useState<string>("");
   const pullRequestsToDisplay = useMemo(() => {
     const normalizedFilter = normalize(filter);
@@ -40,7 +44,7 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests }) =>
       throttle
     >
       {pullRequestsToDisplay.map((searchResult) => (
-        <PullRequestItem key={searchResult.id} pullRequest={searchResult} />
+        <PullRequestItem key={searchResult.id} pullRequest={searchResult} reloadPullRequests={reload} />
       ))}
     </List>
   );
@@ -80,10 +84,15 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
   };
 };
 
-const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
+const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => void }> = ({
+  pullRequest,
+  reloadPullRequests,
+}) => {
   const { buildStatus } = useBuildStatus(pullRequest);
   const { mergeable } = useMergeable(pullRequest);
   const { comments } = usePullRequestComments(pullRequest);
+  const merge = useMerge(pullRequest);
+  const { approve, approved, approvedByUser } = useApprove(pullRequest);
 
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
   return (
@@ -92,6 +101,8 @@ const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
       subtitle={subtitle}
       detail={
         <PullRequestItemDetail
+          approved={approved}
+          approvedByUser={approvedByUser}
           pullRequest={pullRequest}
           buildStatus={buildStatus}
           mergeable={mergeable}
@@ -105,6 +116,40 @@ const PullRequestItem: FC<{ pullRequest: PullRequest }> = ({ pullRequest }) => {
             <Action.OpenInBrowser icon={{ source: Icon.Link }} title="Open in browser" url={pullRequest.href} />
             {buildStatus && (
               <Action.OpenInBrowser icon={{ source: Icon.Stopwatch }} title="Build Status" url={buildStatus.url} />
+            )}
+            {mergeable?.canMerge && (
+              <Action
+                icon={{ source: Icon.Anchor }}
+                title="Merge"
+                onAction={async () => {
+                  const result = await merge();
+                  if (result === undefined || result !== "MERGED") {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Merge",
+                      message: `Could not merge. Reason: ${result ?? "UNKNOWN"}`,
+                    });
+                  } else {
+                    reloadPullRequests();
+                    await showToast({ style: Toast.Style.Success, title: "Merge", message: "Merged" });
+                  }
+                }}
+              />
+            )}
+            {!approvedByUser && (
+              <Action
+                icon={{ source: Icon.Checkmark }}
+                title="Approve"
+                onAction={async () => {
+                  const result = await approve();
+                  if (result) {
+                    reloadPullRequests();
+                    await showToast({ style: Toast.Style.Success, title: "Approve", message: "Approved" });
+                  } else {
+                    await showToast({ style: Toast.Style.Failure, title: "Approve", message: "Could not approve." });
+                  }
+                }}
+              />
             )}
           </ActionPanel.Section>
         </ActionPanel>
@@ -125,11 +170,15 @@ const PullRequestItemDetail: FC<{
   buildStatus?: BuildStatus;
   mergeable?: Mergeable;
   comments?: PullRequestComment[];
-}> = ({ pullRequest, comments, buildStatus, mergeable }) => {
+  approved: boolean;
+  approvedByUser: boolean;
+}> = ({ pullRequest, comments, buildStatus, mergeable, approved, approvedByUser }) => {
   const openTasks = useMemo(
     () => comments?.filter((comment) => comment.state === "OPEN" && comment.severity === "BLOCKER")?.length,
     [comments]
   );
+  const { user } = useConfig();
+
   const markdown = `
   ## ${pullRequest.title}
   \`\`\`
@@ -140,6 +189,7 @@ const PullRequestItemDetail: FC<{
   Status: ${buildStatus === undefined ? "unknown" : buildStatus.state}
   Conflicted: ${booleanToYesNo(mergeable?.conflicted)}
   Mergeable: ${booleanToYesNo(mergeable?.canMerge)}
+  Approved: ${booleanToYesNo(approved)} (${user}: ${booleanToYesNo(approvedByUser)})
   Tasks: ${openTasks ?? "??"}
   \`\`\`
     

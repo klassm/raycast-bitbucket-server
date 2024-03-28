@@ -8,7 +8,7 @@ interface PullRequestProps {
 }
 
 export const ProjectPullRequests: FC<PullRequestProps> = ({ repository }) => {
-  const { loading, pullRequests } = useProjectPullRequests(repository);
+  const { loading, pullRequests, reload } = useProjectPullRequests(repository);
 
-  return <PullRequests loading={loading} pullRequests={pullRequests} />;
+  return <PullRequests loading={loading} pullRequests={pullRequests} reload={reload} />;
 };

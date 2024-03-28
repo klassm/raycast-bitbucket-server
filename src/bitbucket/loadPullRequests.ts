@@ -4,11 +4,12 @@ import { Repository } from "../types/Repository";
 
 export interface PullRequest {
   id: number;
+  version: number;
   title: string;
   description: string;
   state: string;
   author: User;
-  reviewers: User[];
+  reviewers: Reviewer[];
   href: string;
   createdDate: number;
   updatedDate: number;
@@ -23,6 +24,11 @@ interface User {
   displayName: string;
 }
 
+interface Reviewer {
+  user: User;
+  approved: boolean;
+}
+
 interface PullRequestResponseEntry {
   id: number;
   version: number;
@@ -34,9 +40,7 @@ interface PullRequestResponseEntry {
   author: {
     user: User;
   };
-  reviewers: {
-    user: User;
-  }[];
+  reviewers: Reviewer[];
   links: {
     self: { href: string }[];
   };
@@ -64,12 +68,13 @@ function isPullRequestResponse(value: unknown): value is PullRequestResponse {
 function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
   return result.values.map((value) => ({
     id: value.id,
+    version: value.version,
     title: value.title,
     description: value.description,
     state: value.state,
     createdDate: value.createdDate,
     updatedDate: value.updatedDate,
-    reviewers: value.reviewers.map(({ user }) => user),
+    reviewers: value.reviewers,
     author: value.author.user,
     href: value.links.self[0]?.href,
     repositoryName: value.toRef.repository.name,
