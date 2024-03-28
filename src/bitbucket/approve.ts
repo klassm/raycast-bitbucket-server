@@ -12,7 +12,7 @@ function isAutoMergeResponse(response: unknown): response is ApproveResponse {
 
 export async function approve(
   { user, password, url }: Config,
-  { projectKey, repositorySlug, id, version }: PullRequest
+  { projectKey, repositorySlug, id, version }: PullRequest,
 ): Promise<boolean> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/participants/${user}?version=${version}`;
   console.log(requestUrl);

@@ -10,7 +10,7 @@ export function useProjectPullRequests(repository: Repository) {
     async () => loadProjectPullRequests(config, repository),
     {
       expirationMillis: 1000 * 60,
-    }
+    },
   );
   return { pullRequests: data, loading, reload };
 }

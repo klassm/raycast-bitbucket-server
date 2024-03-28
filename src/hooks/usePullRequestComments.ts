@@ -10,7 +10,7 @@ export function usePullRequestComments(pullRequest: PullRequest) {
     async () => loadPullRequestsComments(config, pullRequest),
     {
       expirationMillis: 1000 * 30,
-    }
+    },
   );
   return { comments: data, loading };
 }

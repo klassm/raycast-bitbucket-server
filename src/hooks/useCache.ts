@@ -35,7 +35,7 @@ function updateData<T>(cacheKey: string, newData: T) {
     JSON.stringify({
       lastModified: now,
       data: newData,
-    } as CacheData<T>)
+    } as CacheData<T>),
   );
 }
 
@@ -50,7 +50,7 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
         .then(setData)
         .finally(() => setLoading(false));
     },
-    [loadData, setLoading]
+    [loadData, setLoading],
   );
 
   const update = useMemo(
@@ -58,7 +58,7 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
       updateData(key, newData);
       reloadData();
     },
-    [updateData, reloadData]
+    [updateData, reloadData],
   );
   useEffect(reloadData, []);
 

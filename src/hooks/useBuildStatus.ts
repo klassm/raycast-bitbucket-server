@@ -10,7 +10,7 @@ export function useBuildStatus(pullRequest: PullRequest) {
     async () => loadBuildStatus(config, pullRequest),
     {
       expirationMillis: 1000 * 30,
-    }
+    },
   );
   return { buildStatus: data, loading };
 }

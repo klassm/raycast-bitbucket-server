@@ -10,7 +10,7 @@ export function useMergeable(pullRequest: PullRequest) {
     async () => loadIsMergeable(config, pullRequest),
     {
       expirationMillis: 1000 * 30,
-    }
+    },
   );
   return { mergeable: data, loading };
 }

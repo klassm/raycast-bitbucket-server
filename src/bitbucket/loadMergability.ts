@@ -21,7 +21,7 @@ function isMergableResponse(value: unknown): value is Mergeable {
 
 export async function loadIsMergeable(
   { user, password, url }: Config,
-  { projectKey, repositorySlug, id }: PullRequest
+  { projectKey, repositorySlug, id }: PullRequest,
 ) {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/merge`;
   const response = await fetch(requestUrl, {

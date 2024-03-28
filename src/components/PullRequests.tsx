@@ -30,7 +30,7 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests, relo
       (pr) =>
         normalize(pr.title).includes(normalizedFilter) ||
         normalize(pr.repositoryName).includes(normalizedFilter) ||
-        normalize(pr.author.displayName).includes(normalizedFilter)
+        normalize(pr.author.displayName).includes(normalizedFilter),
     );
     return sortBy(filtered, (pr) => pr.updatedDate).reverse();
   }, [pullRequests, filter]);
@@ -175,7 +175,7 @@ const PullRequestItemDetail: FC<{
 }> = ({ pullRequest, comments, buildStatus, mergeable, approved, approvedByUser }) => {
   const openTasks = useMemo(
     () => comments?.filter((comment) => comment.state === "OPEN" && comment.severity === "BLOCKER")?.length,
-    [comments]
+    [comments],
   );
   const { user } = useConfig();
 

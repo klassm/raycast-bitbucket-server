@@ -31,7 +31,7 @@ function mapBuildStatusResponse(result: BuildStatusResponse): BuildStatus | unde
 
 export async function loadBuildStatus(
   { user, password, url }: Config,
-  { projectKey, repositorySlug, id }: PullRequest
+  { projectKey, repositorySlug, id }: PullRequest,
 ) {
   const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/builds?size=1`;
   const response = await fetch(requestUrl, {

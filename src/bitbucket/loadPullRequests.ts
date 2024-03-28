@@ -102,7 +102,7 @@ async function loadPullRequests(requestUrl: string, user: string, password: stri
 
 export async function loadProjectPullRequests(
   { user, password, url }: Config,
-  { slug, project }: Repository
+  { slug, project }: Repository,
 ): Promise<PullRequest[]> {
   const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests?limit=1000`;
   return loadPullRequests(requestUrl, user, password);
