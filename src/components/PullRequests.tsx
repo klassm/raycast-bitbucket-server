@@ -151,6 +151,8 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
                 }}
               />
             )}
+
+            <Action icon={{ source: Icon.Download }} title="Reload" onAction={reloadPullRequests} />
           </ActionPanel.Section>
         </ActionPanel>
       }

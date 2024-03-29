@@ -5,12 +5,12 @@ import { useConfig } from "./useConfig";
 
 export function useBuildStatus(pullRequest: PullRequest) {
   const config = useConfig();
-  const { data, loading } = useCache(
+  const { data, loading, reload } = useCache(
     `pr-build-status-${pullRequest.projectKey}-${pullRequest.repositorySlug}-${pullRequest.id}`,
     async () => loadBuildStatus(config, pullRequest),
     {
       expirationMillis: 1000 * 30,
     },
   );
-  return { buildStatus: data, loading };
+  return { buildStatus: data, loading, reload };
 }

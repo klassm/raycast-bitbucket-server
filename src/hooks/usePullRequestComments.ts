@@ -5,12 +5,12 @@ import { useConfig } from "./useConfig";
 
 export function usePullRequestComments(pullRequest: PullRequest) {
   const config = useConfig();
-  const { data, loading } = useCache(
+  const { data, loading, reload } = useCache(
     `pr-comments-${pullRequest.projectKey}-${pullRequest.repositorySlug}-${pullRequest.id}`,
     async () => loadPullRequestsComments(config, pullRequest),
     {
       expirationMillis: 1000 * 30,
     },
   );
-  return { comments: data, loading };
+  return { comments: data, loading, reload };
 }
