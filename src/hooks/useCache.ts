@@ -53,7 +53,6 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
       setLoading(true);
       loadData(key, provider, options, force)
         .then((newDate) => {
-          console.log("set new data");
           setData(newDate);
         })
         .finally(() => setLoading(false));

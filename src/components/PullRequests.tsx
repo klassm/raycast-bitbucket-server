@@ -88,11 +88,18 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
   pullRequest,
   reloadPullRequests,
 }) => {
-  const { buildStatus } = useBuildStatus(pullRequest);
-  const { mergeable } = useMergeable(pullRequest);
-  const { comments } = usePullRequestComments(pullRequest);
+  const { buildStatus, reload: reloadBuildStatus } = useBuildStatus(pullRequest);
+  const { mergeable, reload: reloadMergable } = useMergeable(pullRequest);
+  const { comments, reload: reloadComments } = usePullRequestComments(pullRequest);
   const merge = useMerge(pullRequest);
   const { approve, approved, approvedByUser } = useApprove(pullRequest);
+
+  const reload = () => {
+    reloadBuildStatus();
+    reloadMergable();
+    reloadComments();
+    reloadPullRequests();
+  };
 
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
   return (
@@ -130,7 +137,7 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
                       message: `Could not merge. Reason: ${result ?? "UNKNOWN"}`,
                     });
                   } else {
-                    reloadPullRequests();
+                    reload();
                     await showToast({ style: Toast.Style.Success, title: "Merge", message: "Merged" });
                   }
                 }}
@@ -143,7 +150,7 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
                 onAction={async () => {
                   const result = await approve();
                   if (result) {
-                    reloadPullRequests();
+                    reload();
                     await showToast({ style: Toast.Style.Success, title: "Approve", message: "Approved" });
                   } else {
                     await showToast({ style: Toast.Style.Failure, title: "Approve", message: "Could not approve." });
@@ -152,7 +159,7 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
               />
             )}
 
-            <Action icon={{ source: Icon.Download }} title="Reload" onAction={reloadPullRequests} />
+            <Action icon={{ source: Icon.Download }} title="Reload" onAction={reload} />
           </ActionPanel.Section>
         </ActionPanel>
       }
