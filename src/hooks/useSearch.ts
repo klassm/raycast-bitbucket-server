@@ -43,12 +43,15 @@ export function useSearch() {
   const { mostUsed, add: updateMostUsed } = useMostUsed();
 
   useEffect(() => {
+    if (loading) {
+      return;
+    }
     if (query) {
       setSearchResults(search(query, repositories));
     } else {
       setSearchResults(mostUsed);
     }
-  }, [query, repositories]);
+  }, [query, repositories, loading]);
 
   return { loading, searchResults, setQuery, updateMostUsed };
 }

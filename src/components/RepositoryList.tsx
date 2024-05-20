@@ -7,13 +7,7 @@ export const RepositoryList = () => {
   const { searchResults, setQuery, loading, updateMostUsed } = useSearch();
 
   return (
-    <List
-      isLoading={loading}
-      enableFiltering={false}
-      onSearchTextChange={setQuery}
-      searchBarPlaceholder="Search Bitbucket..."
-      throttle
-    >
+    <List isLoading={loading} onSearchTextChange={setQuery} searchBarPlaceholder="Search Bitbucket..." throttle>
       {(searchResults ?? []).map((searchResult) => (
         <SearchListItem key={searchResult.id} item={searchResult} updateMostUsed={() => updateMostUsed(searchResult)} />
       ))}
