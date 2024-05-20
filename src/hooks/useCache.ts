@@ -49,9 +49,9 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
   const [loading, setLoading] = useState<boolean>(false);
 
   const reloadData = useMemo(() => {
-    return (force: boolean) => {
+    return async (force: boolean) => {
       setLoading(true);
-      loadData(key, provider, options, force)
+      await loadData(key, provider, options, force)
         .then((newDate) => {
           setData(newDate);
         })
@@ -62,16 +62,16 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
   const update = useMemo(
     () => (newData: T) => {
       updateData(key, newData);
-      reloadData(false);
+      void reloadData(false);
     },
     [updateData, reloadData],
   );
-  useEffect(() => reloadData(true), []);
+  useEffect(() => void reloadData(true), []);
 
   return {
     data,
     loading,
     update,
-    reload: () => reloadData(true),
+    reload: async () => reloadData(true),
   };
 }

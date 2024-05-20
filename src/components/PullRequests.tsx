@@ -15,7 +15,7 @@ import { useConfig } from "../hooks/useConfig";
 interface PullRequestProps {
   loading: boolean;
   pullRequests: PullRequest[] | undefined;
-  reload: () => void;
+  reload: () => Promise<void>;
 }
 
 function normalize(value: string): string {
@@ -84,7 +84,7 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
   };
 };
 
-const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => void }> = ({
+const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => Promise<void> }> = ({
   pullRequest,
   reloadPullRequests,
 }) => {
@@ -94,11 +94,35 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
   const merge = useMerge(pullRequest);
   const { approve, approved, approvedByUser } = useApprove(pullRequest);
 
-  const reload = () => {
-    reloadBuildStatus();
-    reloadMergable();
-    reloadComments();
-    reloadPullRequests();
+  const reload = async () => {
+    await Promise.all([reloadBuildStatus(), reloadMergable(), reloadComments()]);
+    await reloadPullRequests();
+  };
+
+  const actionApprove = async () => {
+    const result = await approve();
+    if (result) {
+      await showToast({ style: Toast.Style.Success, title: "Approve", message: "Approved" });
+      return true;
+    } else {
+      await showToast({ style: Toast.Style.Failure, title: "Approve", message: "Could not approve." });
+      return false;
+    }
+  };
+
+  const actionMerge = async () => {
+    const result = await merge();
+    if (result === undefined || result !== "MERGED") {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Merge",
+        message: `Could not merge. Reason: ${result ?? "UNKNOWN"}`,
+      });
+      void reload();
+    } else {
+      void reload();
+      await showToast({ style: Toast.Style.Success, title: "Merge", message: "Merged" });
+    }
   };
 
   const subtitle = `${pullRequest.author.displayName}, updated ${new Date(pullRequest.updatedDate).toLocaleString()}`;
@@ -125,35 +149,26 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
               <Action.OpenInBrowser icon={{ source: Icon.Stopwatch }} title="Build Status" url={buildStatus.url} />
             )}
             {mergeable?.canMerge && (
-              <Action
-                icon={{ source: Icon.Anchor }}
-                title="Merge"
-                onAction={async () => {
-                  const result = await merge();
-                  if (result === undefined || result !== "MERGED") {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Merge",
-                      message: `Could not merge. Reason: ${result ?? "UNKNOWN"}`,
-                    });
-                  } else {
-                    reload();
-                    await showToast({ style: Toast.Style.Success, title: "Merge", message: "Merged" });
-                  }
-                }}
-              />
+              <Action icon={{ source: Icon.Anchor }} title="Merge" onAction={async () => actionMerge()} />
             )}
             {!approvedByUser && (
               <Action
                 icon={{ source: Icon.Checkmark }}
                 title="Approve"
                 onAction={async () => {
-                  const result = await approve();
-                  if (result) {
-                    reload();
-                    await showToast({ style: Toast.Style.Success, title: "Approve", message: "Approved" });
-                  } else {
-                    await showToast({ style: Toast.Style.Failure, title: "Approve", message: "Could not approve." });
+                  await actionApprove();
+                  void reload();
+                }}
+              />
+            )}
+            {!approvedByUser && (
+              <Action
+                icon={{ source: Icon.Checkmark }}
+                title="Approve & Merge"
+                onAction={async () => {
+                  if (await actionApprove()) {
+                    await reloadMergable();
+                    await actionMerge();
                   }
                 }}
               />
