@@ -1,16 +1,16 @@
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { sortBy } from "lodash";
 import { FC, useMemo, useState } from "react";
-import { BuildStatus } from "../bitbucket/loadBuildStatus";
 import { Mergeable } from "../bitbucket/loadMergability";
 import { PullRequestComment } from "../bitbucket/loadPullRequestComments";
 import { PullRequest } from "../bitbucket/loadPullRequests";
-import { useBuildStatus } from "../hooks/useBuildStatus";
-import { useMergeable } from "../hooks/useMergeable";
 import { usePullRequestComments } from "../hooks/usePullRequestComments";
 import { useMerge } from "../hooks/useMerge";
 import { useApprove } from "../hooks/useApprove";
 import { useConfig } from "../hooks/useConfig";
+import { useBuildStats } from "../hooks/useBuildStats";
+import { BuildStatus } from "../bitbucket/loadBuildStats";
+import { useMergeable } from "../hooks/useMergeable";
 
 interface PullRequestProps {
   loading: boolean;
@@ -34,7 +34,7 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests, relo
     );
     return sortBy(filtered, (pr) => pr.updatedDate).reverse();
   }, [pullRequests, filter]);
-
+  const { buildStats } = useBuildStats(pullRequests ?? []) ?? {};
   return (
     <List
       isLoading={loading}
@@ -44,7 +44,12 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests, relo
       throttle
     >
       {pullRequestsToDisplay.map((searchResult) => (
-        <PullRequestItem key={searchResult.id} pullRequest={searchResult} reloadPullRequests={reload} />
+        <PullRequestItem
+          key={searchResult.id}
+          pullRequest={searchResult}
+          reloadPullRequests={reload}
+          buildStatus={buildStats?.[searchResult.latestCommit] as BuildStatus | undefined}
+        />
       ))}
     </List>
   );
@@ -65,13 +70,13 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
       mask: Image.Mask.Circle,
     };
   }
-  if (buildStatus?.state === "SUCCESSFUL") {
+  if (buildStatus === "SUCCESSFUL") {
     return "build_success.png";
   }
-  if (buildStatus?.state === "FAILED") {
+  if (buildStatus === "FAILED") {
     return "build_failure.png";
   }
-  if (buildStatus?.state === "INPROGRESS") {
+  if (buildStatus === "INPROGRESS") {
     return {
       source: Icon.CircleProgress50,
       tintColor: Color.Blue,
@@ -84,18 +89,18 @@ const getIcon = (buildStatus: BuildStatus | undefined, mergeable: Mergeable | un
   };
 };
 
-const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => Promise<void> }> = ({
-  pullRequest,
-  reloadPullRequests,
-}) => {
-  const { buildStatus, reload: reloadBuildStatus } = useBuildStatus(pullRequest);
+const PullRequestItem: FC<{
+  pullRequest: PullRequest;
+  reloadPullRequests: () => Promise<void>;
+  buildStatus: BuildStatus | undefined;
+}> = ({ pullRequest, reloadPullRequests, buildStatus }) => {
   const { mergeable, reload: reloadMergable } = useMergeable(pullRequest);
   const { comments, reload: reloadComments } = usePullRequestComments(pullRequest);
   const merge = useMerge(pullRequest);
   const { approve, approved, approvedByUser } = useApprove(pullRequest);
 
   const reload = async () => {
-    await Promise.all([reloadBuildStatus(), reloadMergable(), reloadComments()]);
+    await Promise.all([reloadMergable(), reloadComments()]);
     await reloadPullRequests();
   };
 
@@ -145,9 +150,6 @@ const PullRequestItem: FC<{ pullRequest: PullRequest; reloadPullRequests: () => 
         <ActionPanel>
           <ActionPanel.Section>
             <Action.OpenInBrowser icon={{ source: Icon.Link }} title="Open in browser" url={pullRequest.href} />
-            {buildStatus && (
-              <Action.OpenInBrowser icon={{ source: Icon.Stopwatch }} title="Build Status" url={buildStatus.url} />
-            )}
             {mergeable?.canMerge && (
               <Action icon={{ source: Icon.Anchor }} title="Merge" onAction={async () => actionMerge()} />
             )}
@@ -210,7 +212,7 @@ const PullRequestItemDetail: FC<{
   Author: ${pullRequest.author.displayName}
   Created: ${new Date(pullRequest.createdDate).toLocaleString()}
   Updated: ${new Date(pullRequest.updatedDate).toLocaleString()}
-  Status: ${buildStatus === undefined ? "unknown" : buildStatus.state}
+  Status: ${buildStatus === undefined ? "unknown" : buildStatus}
   Conflicted: ${booleanToYesNo(mergeable?.conflicted)}
   Mergeable: ${booleanToYesNo(mergeable?.canMerge)}
   Approved: ${booleanToYesNo(approved)} (${user}: ${booleanToYesNo(approvedByUser)})

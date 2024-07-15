@@ -16,6 +16,7 @@ export interface PullRequest {
   repositoryName: string;
   repositorySlug: string;
   projectKey: string;
+  latestCommit: string;
 }
 
 interface User {
@@ -51,6 +52,9 @@ interface PullRequestResponseEntry {
       project: { key: string };
     };
   };
+  fromRef: {
+    latestCommit: string;
+  };
 }
 
 interface PullRequestResponse {
@@ -80,6 +84,7 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
     repositoryName: value.toRef.repository.name,
     repositorySlug: value.toRef.repository.slug,
     projectKey: value.toRef.repository.project.key,
+    latestCommit: value.fromRef.latestCommit,
   }));
 }
 
@@ -101,14 +106,14 @@ async function loadPullRequests(requestUrl: string, token: string) {
 }
 
 export async function loadProjectPullRequests(
-  { user, token, url }: Config,
+  { token, url }: Config,
   { slug, project }: Repository,
 ): Promise<PullRequest[]> {
   const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests?limit=1000`;
   return loadPullRequests(requestUrl, token);
 }
 
-export async function loadMyPullRequests({ user, token, url }: Config): Promise<PullRequest[]> {
+export async function loadMyPullRequests({ token, url }: Config): Promise<PullRequest[]> {
   const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests?state=OPEN&limit=1000`;
   return loadPullRequests(requestUrl, token);
 }

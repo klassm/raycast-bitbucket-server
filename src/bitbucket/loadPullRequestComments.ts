@@ -59,6 +59,6 @@ export async function loadPullRequestsComments(
   { user, token, url }: Config,
   { projectKey, repositorySlug, id }: PullRequest,
 ): Promise<PullRequestComment[]> {
-  const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/comments`;
+  const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/blocker-comments`;
   return loadPullRequestComments(requestUrl, user, token);
 }

@@ -15,7 +15,6 @@ export async function approve(
   { projectKey, repositorySlug, id, version }: PullRequest,
 ): Promise<boolean> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/participants/${user}?version=${version}`;
-  console.log(requestUrl);
   const response = await fetch(requestUrl, {
     method: "PUT",
     headers: {
