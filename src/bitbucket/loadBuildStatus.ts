@@ -29,15 +29,12 @@ function mapBuildStatusResponse(result: BuildStatusResponse): BuildStatus | unde
   return entry === undefined ? undefined : pick(entry, "state", "url");
 }
 
-export async function loadBuildStatus(
-  { user, password, url }: Config,
-  { projectKey, repositorySlug, id }: PullRequest,
-) {
+export async function loadBuildStatus({ token, url }: Config, { projectKey, repositorySlug, id }: PullRequest) {
   const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/builds?size=1`;
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
     },
   });
 

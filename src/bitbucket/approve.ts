@@ -11,7 +11,7 @@ function isAutoMergeResponse(response: unknown): response is ApproveResponse {
 }
 
 export async function approve(
-  { user, password, url }: Config,
+  { token, user, url }: Config,
   { projectKey, repositorySlug, id, version }: PullRequest,
 ): Promise<boolean> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/participants/${user}?version=${version}`;
@@ -19,7 +19,7 @@ export async function approve(
   const response = await fetch(requestUrl, {
     method: "PUT",
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
       "X-Atlassian-Token": "no-check",
     },

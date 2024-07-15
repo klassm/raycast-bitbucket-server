@@ -1,6 +1,5 @@
 import fetch from "node-fetch";
 import { Config } from "../types/Config";
-import { Repository } from "../types/Repository";
 import { PullRequest } from "./loadPullRequests";
 
 export interface PullRequestComment {
@@ -39,11 +38,11 @@ function mapPullRequestCommentsResponse(result: PullRequestCommentsResponse): Pu
   }));
 }
 
-async function loadPullRequestComments(requestUrl: string, user: string, password: string) {
+async function loadPullRequestComments(requestUrl: string, user: string, token: string) {
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -57,9 +56,9 @@ async function loadPullRequestComments(requestUrl: string, user: string, passwor
 }
 
 export async function loadPullRequestsComments(
-  { user, password, url }: Config,
+  { user, token, url }: Config,
   { projectKey, repositorySlug, id }: PullRequest,
 ): Promise<PullRequestComment[]> {
   const requestUrl = `${url}/rest/ui/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/comments`;
-  return loadPullRequestComments(requestUrl, user, password);
+  return loadPullRequestComments(requestUrl, user, token);
 }

@@ -83,11 +83,11 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
   }));
 }
 
-async function loadPullRequests(requestUrl: string, user: string, password: string) {
+async function loadPullRequests(requestUrl: string, token: string) {
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -101,14 +101,14 @@ async function loadPullRequests(requestUrl: string, user: string, password: stri
 }
 
 export async function loadProjectPullRequests(
-  { user, password, url }: Config,
+  { user, token, url }: Config,
   { slug, project }: Repository,
 ): Promise<PullRequest[]> {
   const requestUrl = `${url}/rest/api/latest/projects/${project.key}/repos/${slug}/pull-requests?limit=1000`;
-  return loadPullRequests(requestUrl, user, password);
+  return loadPullRequests(requestUrl, token);
 }
 
-export async function loadMyPullRequests({ user, password, url }: Config): Promise<PullRequest[]> {
+export async function loadMyPullRequests({ user, token, url }: Config): Promise<PullRequest[]> {
   const requestUrl = `${url}/rest/api/latest/dashboard/pull-requests?state=OPEN&limit=1000`;
-  return loadPullRequests(requestUrl, user, password);
+  return loadPullRequests(requestUrl, token);
 }

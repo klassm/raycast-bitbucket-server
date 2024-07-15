@@ -1,5 +1,5 @@
 export interface Config {
   user: string;
-  password: string;
+  token: string;
   url: string;
 }

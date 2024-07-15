@@ -13,14 +13,14 @@ function isAutoMergeResponse(response: unknown): response is MergeResponse {
 }
 
 export async function merge(
-  { user, password, url }: Config,
+  { user, token, url }: Config,
   { projectKey, repositorySlug, id, version }: PullRequest,
 ): Promise<PullRequestMergeStatus | undefined> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/merge?version=${version}`;
   const response = await fetch(requestUrl, {
     method: "POST",
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
       "X-Atlassian-Token": "no-check",
     },
   });

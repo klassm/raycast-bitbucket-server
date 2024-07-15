@@ -41,12 +41,12 @@
       "description": "Username"
     },
     {
-      "name": "password",
-      "type": "password",
-      "title": "Bitbucket Password",
+      "name": "token",
+      "type": "textfield",
+      "title": "Access Token",
       "required": true,
       "default": "",
-      "description": "Bitbucket password. You might need to create an app password from your personal Bitbucket settings."
+      "description": "HTTP Access Token (generate via the Bitbucket UI)"
     }
   ],
   "dependencies": {

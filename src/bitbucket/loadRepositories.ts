@@ -8,10 +8,10 @@ interface ResultPage {
   values: Repository[];
 }
 
-async function loadRepositoryPage(start = 0, { user, password, url }: Config): Promise<ResultPage> {
+async function loadRepositoryPage(start = 0, { token, url }: Config): Promise<ResultPage> {
   const result = await fetch(`${url}/rest/api/1.0/repos?limit=1000&start=${start}`, {
     headers: {
-      Authorization: "Basic " + Buffer.from(user + ":" + password).toString("base64"),
+      Authorization: `Bearer ${token}`,
     },
   });
   const data = await result.json();
