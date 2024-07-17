@@ -44,7 +44,7 @@ export async function loadBuildStats({ token, url }: Config, gitHashes: string[]
     return undefined;
   }
   const requestUrl = `${url}/rest/build-status/1.0/commits/stats`;
-  const requestBody = JSON.stringify(gitHashes.slice);
+  const requestBody = JSON.stringify(gitHashes);
   const response = await accessRateLimited("loadBuildStats", async () =>
     fetch(requestUrl, {
       method: "POST",
@@ -60,7 +60,13 @@ export async function loadBuildStats({ token, url }: Config, gitHashes: string[]
     const result = await response.json();
     console.log("result build stats", result);
     if (!isBuildStatsResponse(result)) {
-      console.log("Weird build stats response from Bitbucket", result, response.status, response.statusText);
+      console.log(
+        "Weird build stats response from Bitbucket",
+        result,
+        response.status,
+        response.statusText,
+        requestBody,
+      );
       return undefined;
     }
 

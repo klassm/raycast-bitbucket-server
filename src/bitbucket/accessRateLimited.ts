@@ -9,11 +9,9 @@ export async function accessRateLimited<T>(ident: string, fct: () => Promise<T>)
   const now = new Date().getTime();
   const diffToNow = now - (lastRequest ?? now);
   if (lastRequest !== null && diffToNow < rateLimitMillis) {
-    //console.log("sleeping", {diffToNow, request: ident})
     await sleep(diffToNow);
     return accessRateLimited(ident, fct);
   } else {
-    console.log("done", ident);
     lastRequest = now;
     return fct();
   }
