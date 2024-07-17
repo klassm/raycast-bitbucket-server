@@ -9,7 +9,7 @@ export function usePullRequestComments(pullRequest: PullRequest) {
     `pr-comments-${pullRequest.projectKey}-${pullRequest.repositorySlug}-${pullRequest.id}`,
     async () => loadPullRequestsComments(config, pullRequest),
     {
-      expirationMillis: 1000 * 30,
+      expirationMillis: 1000 * 120,
     },
   );
   return { comments: data, loading, reload };

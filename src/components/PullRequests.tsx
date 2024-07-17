@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Image, List, showToast, Toast } from "@raycast/api";
-import { sortBy } from "lodash";
+import { pull, sortBy } from "lodash";
 import { FC, useMemo, useState } from "react";
 import { Mergeable } from "../bitbucket/loadMergability";
 import { PullRequestComment } from "../bitbucket/loadPullRequestComments";
@@ -43,12 +43,12 @@ export const PullRequests: FC<PullRequestProps> = ({ loading, pullRequests, relo
       searchBarPlaceholder="Search Pull Requests..."
       throttle
     >
-      {pullRequestsToDisplay.map((searchResult) => (
+      {pullRequestsToDisplay.map((pullRequest) => (
         <PullRequestItem
-          key={searchResult.id}
-          pullRequest={searchResult}
+          key={pullRequest.id + "_" + pullRequest.repositorySlug}
+          pullRequest={pullRequest}
           reloadPullRequests={reload}
-          buildStatus={buildStats?.[searchResult.latestCommit] as BuildStatus | undefined}
+          buildStatus={buildStats?.[pullRequest.latestCommit] as BuildStatus | undefined}
         />
       ))}
     </List>

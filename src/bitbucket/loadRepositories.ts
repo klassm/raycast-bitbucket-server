@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { Config } from "../types/Config";
 import { Repository } from "../types/Repository";
+import { accessRateLimited } from "./accessRateLimited";
 
 interface ResultPage {
   isLastPage: boolean;
@@ -9,11 +10,13 @@ interface ResultPage {
 }
 
 async function loadRepositoryPage(start = 0, { token, url }: Config): Promise<ResultPage> {
-  const result = await fetch(`${url}/rest/api/1.0/repos?limit=1000&start=${start}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const result = await accessRateLimited("repositories", async () =>
+    fetch(`${url}/rest/api/1.0/repos?limit=1000&start=${start}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
   const data = await result.json();
   return data as ResultPage;
 }

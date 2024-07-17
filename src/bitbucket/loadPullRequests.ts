@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { Config } from "../types/Config";
 import { Repository } from "../types/Repository";
+import { accessRateLimited } from "./accessRateLimited";
 
 export interface PullRequest {
   id: number;
@@ -89,12 +90,14 @@ function mapPullRequestResponse(result: PullRequestResponse): PullRequest[] {
 }
 
 async function loadPullRequests(requestUrl: string, token: string) {
-  const response = await fetch(requestUrl, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await accessRateLimited("pull requests", async () =>
+    fetch(requestUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
 
   const result = await response.json();
   if (!isPullRequestResponse(result)) {

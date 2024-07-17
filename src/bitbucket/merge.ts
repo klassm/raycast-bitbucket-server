@@ -1,6 +1,7 @@
 import { Config } from "../types/Config";
 import { PullRequest } from "./loadPullRequests";
 import fetch from "node-fetch";
+import { accessRateLimited } from "./accessRateLimited";
 
 export type PullRequestMergeStatus = "MERGED" | "ERROR";
 
@@ -13,17 +14,19 @@ function isAutoMergeResponse(response: unknown): response is MergeResponse {
 }
 
 export async function merge(
-  { user, token, url }: Config,
+  { token, url }: Config,
   { projectKey, repositorySlug, id, version }: PullRequest,
 ): Promise<PullRequestMergeStatus | undefined> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/merge?version=${version}`;
-  const response = await fetch(requestUrl, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "X-Atlassian-Token": "no-check",
-    },
-  });
+  const response = await accessRateLimited("merge", async () =>
+    fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-Atlassian-Token": "no-check",
+      },
+    }),
+  );
 
   try {
     const result = await response.json();

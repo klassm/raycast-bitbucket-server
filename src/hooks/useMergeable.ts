@@ -9,7 +9,7 @@ export function useMergeable(pullRequest: PullRequest) {
     `pr-mergeable-${pullRequest.projectKey}-${pullRequest.repositorySlug}-${pullRequest.id}`,
     async () => loadIsMergeable(config, pullRequest),
     {
-      expirationMillis: 1000 * 30,
+      expirationMillis: 1000 * 120,
     },
   );
   return { mergeable: data, loading, reload };

@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { Config } from "../types/Config";
 import { PullRequest } from "./loadPullRequests";
+import { accessRateLimited } from "./accessRateLimited";
 
 export interface PullRequestComment {
   id: number;
@@ -38,27 +39,29 @@ function mapPullRequestCommentsResponse(result: PullRequestCommentsResponse): Pu
   }));
 }
 
-async function loadPullRequestComments(requestUrl: string, user: string, token: string) {
-  const response = await fetch(requestUrl, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+async function loadPullRequestComments(requestUrl: string, token: string) {
+  const response = await accessRateLimited("comments", async () =>
+    fetch(requestUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
 
   const result = await response.json();
   if (!isPullRequestResponse(result)) {
     console.log("Weird pull request comments response from Bitbucket", result, response.status, response.statusText);
-    throw new Error(`Got a weird pull request response from Bitbucket: ${response.status} ${response.statusText}`);
+    return [];
   }
 
   return mapPullRequestCommentsResponse(result);
 }
 
 export async function loadPullRequestsComments(
-  { user, token, url }: Config,
+  { token, url }: Config,
   { projectKey, repositorySlug, id }: PullRequest,
 ): Promise<PullRequestComment[]> {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/blocker-comments`;
-  return loadPullRequestComments(requestUrl, user, token);
+  return loadPullRequestComments(requestUrl, token);
 }

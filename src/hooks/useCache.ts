@@ -66,7 +66,7 @@ export function useCache<T>(key: string, provider: CacheProvider<T>, options: Ca
     },
     [updateData, reloadData],
   );
-  useEffect(() => void reloadData(true), [reloadData]);
+  useEffect(() => void reloadData(false), [reloadData]);
 
   return {
     data,

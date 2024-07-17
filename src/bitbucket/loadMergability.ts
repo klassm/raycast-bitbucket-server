@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { Config } from "../types/Config";
 import { PullRequest } from "./loadPullRequests";
+import { accessRateLimited } from "./accessRateLimited";
 
 export interface Mergeable {
   conflicted: boolean;
@@ -18,14 +19,16 @@ function isMergableResponse(value: unknown): value is Mergeable {
   );
 }
 
-export async function loadIsMergeable({ user, token, url }: Config, { projectKey, repositorySlug, id }: PullRequest) {
+export async function loadIsMergeable({ token, url }: Config, { projectKey, repositorySlug, id }: PullRequest) {
   const requestUrl = `${url}/rest/api/latest/projects/${projectKey}/repos/${repositorySlug}/pull-requests/${id}/merge`;
-  const response = await fetch(requestUrl, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await accessRateLimited("mergeability", async () =>
+    fetch(requestUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }),
+  );
 
   try {
     const result = await response.json();
